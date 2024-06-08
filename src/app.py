@@ -8,7 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, Person, Planet
+
 #from models import Person
 
 app = Flask(__name__)
@@ -36,14 +37,80 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
+# routes for people starwars
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
-
+@app.route('/people', methods=['GET'])
+def get_people():
+    response_body = Person.query.all()
+    response_body  = list(map(lambda x: x.serialize(), response_body))
     return jsonify(response_body), 200
+
+@app.route('/people/<int:person_id>', methods=['GET'])
+def get_one_person(person_id):
+    
+    single_person = Person.query.get(person_id)
+    if single_person is None:
+        raise APIException(f"Person ID not found {person_id}", status_code=404)
+    return jsonify(single_person.serialize()), 200
+
+
+# routes for planet starwars
+
+@app.route('/planets', methods=['GET'])
+def get_planets():
+    response_body = Planet.query.all()
+    response_body  = list(map(lambda x: x.serialize(), response_body))
+    return jsonify(response_body), 200
+
+
+@app.route('/planets/<int:planet_id>', methods=['GET'])
+def get_one_planet(planet_id):
+    
+    single_planet = Planet.query.get(planet_id)
+    if single_planet is None:
+        raise APIException(f"Planet ID not found {planet_id}", status_code=404)
+    return jsonify(single_planet.serialize()), 200
+
+
+# users and favorites
+
+@app.route('/users', methods=['GET'])
+def get_all_users():
+    pass
+
+@app.route('/users/<int:user_id>', methods=['GET'])
+def get_one_users():
+    pass
+
+@app.route('/users/<int:user_id>/favorites', methods=['GET'])
+def get_one_user_favorites():
+    pass
+
+@app.route('/users/<int:user_id>/favorite/people/<int:people_id>', methods=['POST'])
+def add_one_person_to_favorites():
+    pass
+
+@app.route('/users/<int:user_id>/favorite/planets/<int:planet_id>', methods=['POST'])
+def add_one_planet_to_favorites():
+    pass
+
+@app.route('/users/<int:user_id>/favorite/people/<int:people_id>', methods=['DELETE'])
+def delete_one_person_from_favorites():
+    pass
+
+@app.route('/users/<int:user_id>/favorite/planets/<int:planet_id>', methods=['DELETE'])
+def delete_one_planet_from_favorites():
+    pass
+
+
+
+
+
+
+
+
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
