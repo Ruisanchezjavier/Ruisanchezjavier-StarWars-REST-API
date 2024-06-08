@@ -6,7 +6,7 @@ class Person(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
     home_planet = db.Column(db.Integer, db.ForeignKey('planet.id'))
-    favorites = db.Column(db.Integer, db.ForeignKey('favorite_people.id'))
+    favorites_of = db.relationship('Favorite_People', backref='people_favorited')
 
     def __repr__(self):
         return '<Person %r>' % self.name
@@ -25,7 +25,7 @@ class Planet(db.Model):
     name = db.Column(db.String(250), nullable=False)
     terrain = db.Column(db.String(250))
     homeworld_of = db.relationship('Person', backref='homeworld', lazy='dynamic')
-    favorites = db.Column(db.Integer, db.ForeignKey('user_id_favorites.id'))
+    favorites_of = db.relationship('Favorite_Planets', backref="planet_favorited", lazy='dynamic')
     
     def __repr__(self):
         return '<Planet %r>' % self.name
@@ -38,9 +38,10 @@ class Planet(db.Model):
             # do not serialize the password, its a security breach
         }
     
-class Favorites_People(db.Model):
+class Favorite_People(db.Model):
      id = db.Column(db.Integer, primary_key=True)
      user_id_favorites = db.Column(db.Integer, db.ForeignKey('users.id'))
+     favorite_person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
      # favorite_of = db.relationship('Person', backref='favorite_people', lazy='dynamic')
 
      def serialize(self):
@@ -49,9 +50,10 @@ class Favorites_People(db.Model):
            "user_id_favorites": self.user_id_favorites,
         }
     
-class Favorites_Planets(db.Model):
+class Favorite_Planets(db.Model):
      id = db.Column(db.Integer, primary_key=True)
      user_id_favorites = db.Column(db.Integer, db.ForeignKey('users.id'))
+     favorite_planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'))
      # favorite_of = db.relationship('Planet', backref='favorite_planet', lazy='dynamic')
 
      def serialize(self):
@@ -67,8 +69,8 @@ class Users(db.Model):
     name = db.Column(db.String(250), nullable=False)
     username = db.Column(db.String(250), nullable=False)
     password = db.Column(db.String(250), nullable=False)
-    favorites_people_of = db.relationship('FavoritePeople', backref='user_id', lazy='dynamic')
-    favorites_planets_of = db.relationship('FavoritePlanets', backref='user_id', lazy='dynamic')
+    favorites_people_of = db.relationship('Favorite_People', backref='user_id', lazy='dynamic')
+    favorites_planets_of = db.relationship('Favorite_Planets', backref='user_id', lazy='dynamic')
     
     def __rep__(self):
         return '<user %r>' %self.username
