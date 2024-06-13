@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, Person, Planet, Users
+from models import db, Person, Planet, Users, Favorite_Planets, Favorite_People
 
 #from models import Person
 
@@ -86,15 +86,27 @@ def get_one_users(user_id):
     single_user = Users.query.get(user_id)
     if single_user is None:
         raise APIException(f"User ID not found {user_id}", status_code=404)
-    return jsonify(single_user), 200
+    return jsonify(single_user.serialize()), 200
 
-@app.route('/users/<int:user_id>/favorites', methods=['GET'])
-def get_one_user_favorites():
-    # user_favorited = Users.query.get(favorite_user_id)
-    # if user_favorited is None:
-    #     raise APIException(f"Favorite user ID bot found {favorite_user_id}", status_code=404)
-    # return jsonify(user_favorited), 200
-    pass
+@app.route('/users/<int:user_id>/favorite', methods=['GET'])
+def get_user_favorites(user_id):
+    # Example to retrieve favorites of a user
+    user = Users.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    favorites_people = user.favorites_people_of.all()
+    favorites_planets = user.favorites_planets_of.all()
+
+    serialized_people = [fav.serialize() for fav in favorites_people]
+    serialized_planets = [fav.serialize() for fav in favorites_planets]
+
+    return jsonify({
+        "user": user.serialize(),
+        "favorite_people": serialized_people,
+        "favorite_planets": serialized_planets
+    })
+         
     
 
 @app.route('/users/<int:user_id>/favorite/people/<int:people_id>', methods=['POST'])

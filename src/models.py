@@ -6,7 +6,7 @@ class Person(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
     home_planet = db.Column(db.Integer, db.ForeignKey('planet.id'))
-    favorites_of = db.relationship('Favorite_People', backref='people_favorited')
+    favorites_of = db.relationship('Favorite_People', backref='people_favorited', lazy=True)
 
     def __repr__(self):
         return '<Person %r>' % self.name
@@ -27,6 +27,7 @@ class Planet(db.Model):
     homeworld_of = db.relationship('Person', backref='homeworld', lazy='dynamic')
     favorites_of = db.relationship('Favorite_Planets', backref="planet_favorited", lazy='dynamic')
     
+    
     def __repr__(self):
         return '<Planet %r>' % self.name
 
@@ -42,7 +43,7 @@ class Favorite_People(db.Model):
      id = db.Column(db.Integer, primary_key=True)
      user_id_favorites = db.Column(db.Integer, db.ForeignKey('users.id'))
      favorite_person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
-     # favorite_of = db.relationship('Person', backref='favorite_people', lazy='dynamic')
+    #  favorite_of = db.relationship('Person', backref='favorite_people', lazy=True)
 
      def serialize(self):
         return{
@@ -54,12 +55,13 @@ class Favorite_Planets(db.Model):
      id = db.Column(db.Integer, primary_key=True)
      user_id_favorites = db.Column(db.Integer, db.ForeignKey('users.id'))
      favorite_planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'))
-     # favorite_of = db.relationship('Planet', backref='favorite_planet', lazy='dynamic')
+    #  favorite_of = db.relationship('Planet', backref='favorite_planet', lazy=True)
 
      def serialize(self):
         return{
            "id": self.id,
            "user_id_favorites": self.user_id_favorites,
+           
         }
      
 
