@@ -110,26 +110,84 @@ def get_user_favorites(user_id):
     
 
 @app.route('/users/<int:user_id>/favorite/people/<int:people_id>', methods=['POST'])
-def add_one_person_to_favorites():
-    pass
+def add_one_person_to_favorites(user_id,person_id):
+    user = Users.query.filter_by(id = user_id).first()
+    if user is None: 
+        return jsonify({"msg": "user not found"}), 404 
+    
+    person = Person.query.filter_by(id = person_id).first()
+    if person is None: 
+        return jsonify({"msg": "person not found"}), 404 
+    
+    check_favorite = Favorite_People.query.filter_by(favorite_person_id = person_id).first()
+    if check_favorite :
+        return jsonify({"msg": "...already in the list"}), 409
+    
+    favorite_person = Favorite_People(user_id_favorites = user_id, favorite_person_id = person_id)
+    db.session.add(favorite_person) 
+    db.session.commit()
+    db.session.refresh(favorite_person)
+    return jsonify({"msg": "...person has been added!"}), 201
+ 
 
 @app.route('/users/<int:user_id>/favorite/planets/<int:planet_id>', methods=['POST'])
-def add_one_planet_to_favorites():
-    pass
+def add_one_planet_to_favorites(user_id, planet_id):
+    user = Users.query.filter_by(id = user_id).first()
+    if user is None: 
+        return jsonify({"msg": "user not found"}), 404 
+    
+    planet = Planet.query.filter_by(id = planet_id).first()
+    if planet is None: 
+        return jsonify({"msg": "...not found"}), 404 
+    
+    check_favorite = Favorite_Planets.query.filter_by(favorite_planet_id = planet_id).first()
+    if check_favorite :
+        return jsonify({"msg": "...already on the list"}), 409
+    
+    favorite_planet = Favorite_Planets(user_id_favorites = user_id, favorite_planet_id = planet_id)
+    db.session.add(favorite_planet) 
+    db.session.commit()
+    db.session.refresh(favorite_planet)
+    return jsonify({"msg": "...person has been added!"}), 201
+    
 
 @app.route('/users/<int:user_id>/favorite/people/<int:people_id>', methods=['DELETE'])
-def delete_one_person_from_favorites():
-    pass
+def delete_one_person_from_favorites(user_id, person_id):
+    user = Users.query.filter_by(id = user_id).first()
+    if user is None: 
+        return jsonify({"msg": "user not found"}), 404 
+    
+    person = Person.query.filter_by(id = person_id).first()
+    if person is None: 
+        return jsonify({"msg": "person not found"}), 404 
+    
+    favorite_person = Favorite_People.query.filter_by(user_id_favorites = user_id, favorite_person_id = person_id).first()
+    if favorite_person is None :
+        return jsonify({"msg": "This person is not in your favorites"}), 404
+    
+    db.session.delete(favorite_person) 
+    db.session.commit()
+
+    return jsonify({"msg": "This person has been removed from your favorites"}), 200 
 
 @app.route('/users/<int:user_id>/favorite/planets/<int:planet_id>', methods=['DELETE'])
-def delete_one_planet_from_favorites():
-    pass
+def delete_one_planet_from_favorites(user_id, planet_id):
+    user = Users.query.filter_by(id = user_id).first()
+    if user is None: 
+        return jsonify({"msg": "user not found"}), 404 
+    
+    planet = Planet.query.filter_by(id = planet_id).first()
+    if planet is None: 
+        return jsonify({"msg": "person not found"}), 404 
+    
+    favorite_planet = Favorite_Planets.query.filter_by(user_id_favorites = user_id, favorite_planet_id = planet_id).first()
+    if favorite_planet is None :
+        return jsonify({"msg": "This person is not in your favorites"}), 404
+    
+    db.session.delete(favorite_planet) 
+    db.session.commit()
 
-
-
-
-
-
+    return jsonify({"msg": "This person has been removed from your favorites"}), 200 
 
 
 
